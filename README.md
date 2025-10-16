@@ -13,3 +13,7 @@ AgriScan AI is an intelligent web application that helps farmers and researchers
 ⚡ Instant Results – Get plant health diagnosis within seconds.
 
 💾 Secure Processing – Images are analyzed locally or securely via API, ensuring data privacy.
+
+Upload a picture of a plant leaf and click “Diagnose Plant” to get an instant disease prediction.
+
+🧩 Tech Stack Layer Technology Frontend React.js, Tailwind CSS Backend Flask / FastAPI (Python) AI Model TensorFlow / PyTorch CNN Deployment Render / Vercel / Hugging Face Spaces Storage Local / AWS S3 (for image uploads)

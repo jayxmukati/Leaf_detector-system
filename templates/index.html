@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriScan - Plant Disease Detector</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f8e8; color: #333; text-align: center; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #2e7d32; }
+        #image-preview { max-width: 100%; max-height: 300px; margin-top: 20px; border-radius: 5px; border: 2px dashed #ccc; display: none; }
+        .btn { background-color: #4caf50; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .btn:hover { background-color: #45a049; }
+        #result { margin-top: 30px; text-align: left; background: #e8f5e9; padding: 20px; border-radius: 5px; border-left: 5px solid #4caf50; display: none; }
+        #result h2 { margin-top: 0; }
+        .loader { border: 8px solid #f3f3f3; border-radius: 50%; border-top: 8px solid #4caf50; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        input[type="file"] { display: none; }
+        .custom-file-upload { border: 1px solid #ccc; display: inline-block; padding: 10px 15px; cursor: pointer; background: #f9f9f9; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 AgriScan AI 🌿</h1>
+        <p>Upload a picture of a plant leaf to diagnose diseases.</p>
+        
+        <label for="file-upload" class="custom-file-upload">
+            Choose Image
+        </label>
+        <input id="file-upload" type="file" accept="image/*">
+        
+        <img id="image-preview" src="#" alt="Image Preview"/>
+        
+        <br>
+        <button id="btn-predict" class="btn">Diagnose Plant</button>
+        
+        <div id="loader" class="loader"></div>
+        <div id="result">
+            <h2>Diagnosis Result</h2>
+            <p><strong>Disease:</strong> <span id="disease-name"></span></p>
+            <p><strong>Confidence:</strong> <span id="confidence-score"></span></p>
+            <hr>
+            <h3>Suggested Solutions:</h3>
+            <p><strong>Organic:</strong> <span id="organic-solution"></span></p>
+            <p><strong>Chemical:</strong> <span id="chemical-solution"></span></p>
+        </div>
+    </div>
+
+    <script>
+        const imageUpload = document.getElementById('file-upload');
+        const imagePreview = document.getElementById('image-preview');
+        const predictBtn = document.getElementById('btn-predict');
+        const resultDiv = document.getElementById('result');
+        const loader = document.getElementById('loader');
+
+        // Show image preview
+        imageUpload.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                imagePreview.style.display = 'block';
+                resultDiv.style.display = 'none';
+                reader.onload = function (e) {
+                    imagePreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle prediction
+        predictBtn.addEventListener('click', function () {
+            const formData = new FormData();
+            formData.append('file', imageUpload.files[0]);
+
+            if (!imageUpload.files[0]) {
+                alert("Please select an image first!");
+                return;
+            }
+
+            // Show loader and hide previous results
+            loader.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loader.style.display = 'none';
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('disease-name').textContent = data.disease;
+                    document.getElementById('confidence-score').textContent = data.confidence;
+                    document.getElementById('organic-solution').textContent = data.solution.organic;
+                    document.getElementById('chemical-solution').textContent = data.solution.chemical;
+                    resultDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                loader.style.display = 'none';
+                alert('An error occurred. See console for details.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
